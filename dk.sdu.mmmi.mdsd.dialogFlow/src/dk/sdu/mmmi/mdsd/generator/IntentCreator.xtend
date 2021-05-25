@@ -32,7 +32,8 @@ class IntentCreator {
 	}
 
 	def private compileUserSays(Intent intent){
-		var id = UUID.randomUUID().toString()
+		''''''
+		/*var id = UUID.randomUUID().toString()
 		'''
 		[
 		«FOR expression : intent.phrase.phrases SEPARATOR ','»
@@ -58,7 +59,7 @@ class IntentCreator {
 		  	}
 		  «ENDFOR»
 		]
-		'''
+		'''*/
 	}
 
 	def private compilePhrases(Intent intent){

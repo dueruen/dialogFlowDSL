@@ -7,11 +7,17 @@ import org.eclipse.xtext.validation.Check
 import dk.sdu.mmmi.mdsd.dialogFlow.DialogFlowSystem
 import dk.sdu.mmmi.mdsd.dialogFlow.Declaration
 import dk.sdu.mmmi.mdsd.dialogFlow.DialogFlowPackage
-import dk.sdu.mmmi.mdsd.dialogFlow.ActionValue
-import dk.sdu.mmmi.mdsd.dialogFlow.ResponseValue
 import org.eclipse.xtext.EcoreUtil2
+import java.util.HashSet
+import java.util.Set
+import dk.sdu.mmmi.mdsd.dialogFlow.Systems
+import dk.sdu.mmmi.mdsd.dialogFlow.EntityValueStringOrChild
+import dk.sdu.mmmi.mdsd.dialogFlow.ResponseValueStringOrChild
+import dk.sdu.mmmi.mdsd.dialogFlow.ResponseValue
 import dk.sdu.mmmi.mdsd.dialogFlow.Intent
 import java.util.ArrayList
+import dk.sdu.mmmi.mdsd.dialogFlow.ActionValue
+import dk.sdu.mmmi.mdsd.dialogFlow.MappingStringOrChild
 
 /**
  * This class contains custom validation rules. 
@@ -37,7 +43,11 @@ class DialogFlowValidator extends AbstractDialogFlowValidator {
 	}
 	
 	@Check
-	def checkResponses(ResponseValue responseValue) {
+	def checkResponses(ResponseValueStringOrChild responseValue) {
+		if (responseValue.strVal == null) {
+			return
+		}
+		
 		var intent = EcoreUtil2.getContainerOfType(responseValue, Intent);
 			
 		var actionValues = new ArrayList<String>();
@@ -45,14 +55,95 @@ class DialogFlowValidator extends AbstractDialogFlowValidator {
 			actionValues.add(action.value);
 		}
 
-		var tokens = responseValue.response.split(" ");
+		var tokens = responseValue.strVal.split(" ");
 		for (String s : tokens) {
 			if (s.startsWith("$")) {
 				if (!actionValues.contains(s.substring(1))) {
-					error ("Action value: " + s + " is not valid", DialogFlowPackage.Literals.RESPONSE_VALUE__RESPONSE, "invalidActionValue");
+					error ("Action value: " + s + " is not valid", DialogFlowPackage.Literals.RESPONSE_VALUE_STRING_OR_CHILD__STR_VAL, "invalidActionValue");
 					return;
 				}
 			}
 		}
 	}
+	
+	@Check
+	def checkEntityNoCyclicExtends(DialogFlowSystem dfsystem) {
+		val seen = new HashSet<String>
+		seen.add(dfsystem.name)
+		if(dfsystem.zuper.selfExtends(seen)) {
+			error('Cyclic extends relation',DialogFlowPackage.Literals.DIALOG_FLOW_SYSTEM__ZUPER,"cyclicInheritance")
+		}
+	}
+	
+	def boolean selfExtends(DialogFlowSystem next, Set<String> seen) {
+		if(next===null) false
+		else if(seen.contains(next.name)) true
+		else { seen.add(next.name) next.zuper.selfExtends(seen) }
+	}
+	
+	@Check
+	def checkResponseValueStringOrChild(ResponseValueStringOrChild vdata) {
+		if (vdata.type == null) {
+			return
+		}
+		
+		var startEntity = EcoreUtil2.getContainerOfType(vdata,DialogFlowSystem)
+		var allSystems = EcoreUtil2.getContainerOfType(vdata,Systems)
+		var found = false;
+		
+		for (DialogFlowSystem sys : allSystems.systems) {
+			if (sys.zuper !== null) {
+				if (sys.zuper == startEntity && sys.systemName !== null) {
+					found = true;
+				}						
+			}
+		}
+		if(!found) {
+			error('Child has no systemName',DialogFlowPackage.Literals.RESPONSE_VALUE_STRING_OR_CHILD__TYPE,"noChildName")
+		}		
+	}
+	
+	@Check
+	def checkEntityValueStringOrChild(EntityValueStringOrChild vdata) {
+		if (vdata.type == null) {
+			return
+		}
+		
+		var startEntity = EcoreUtil2.getContainerOfType(vdata,DialogFlowSystem)
+		var allSystems = EcoreUtil2.getContainerOfType(vdata,Systems)
+		var found = false;
+		
+		for (DialogFlowSystem sys : allSystems.systems) {
+			if (sys.zuper !== null) {
+				if (sys.zuper == startEntity && sys.systemName !== null) {
+					found = true;
+				}						
+			}
+		}
+		if(!found) {
+			error('Child has no systemName',DialogFlowPackage.Literals.ENTITY_VALUE_STRING_OR_CHILD__TYPE,"noChildName")
+		}		
+	}
+	
+	@Check
+	def checkMappingStringOrChild(MappingStringOrChild vdata) {
+		if (vdata.type == null) {
+			return
+		}
+		
+		var startEntity = EcoreUtil2.getContainerOfType(vdata,DialogFlowSystem)
+		var allSystems = EcoreUtil2.getContainerOfType(vdata,Systems)
+		var found = false;
+		
+		for (DialogFlowSystem sys : allSystems.systems) {
+			if (sys.zuper !== null) {
+				if (sys.zuper == startEntity && sys.systemName !== null) {
+					found = true;
+				}						
+			}
+		}
+		if(!found) {
+			error('Child has no systemName',DialogFlowPackage.Literals.MAPPING_STRING_OR_CHILD__TYPE,"noChildName")
+		}		
+	}				
 }

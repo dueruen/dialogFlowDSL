@@ -1,13 +1,25 @@
 grammar dk.sdu.mmmi.mdsd.DialogFlow with org.eclipse.xtext.common.Terminals
 
 generate dialogFlow "http://www.sdu.dk/mmmi/mdsd/DialogFlow"
+
+Systems:
+	systems+=DialogFlowSystem*
+;
 	
 DialogFlowSystem:
-	'system' name=ID declarations+=Declaration*
+	'system' name=ID (':' zuper=[DialogFlowSystem])? (systemName=ChildName)? declarations+=Declaration*
+;
+
+ChildName:
+	'systemName' value=STRING
+;
+
+ChildNameRef:
+	'sysName'
 ;
 
 Declaration:
-	Intent | Entity
+	Intent | Entity | SystemEntity
 ;
 
 Intent:
@@ -23,7 +35,11 @@ PhraseValue:
 ;
 
 Mapping:
-	value=STRING ('as' entity=[Entity])?   
+	value=MappingStringOrChild ('as' entity=[Entity])? |  ('as' entity=[SystemEntity])?
+;
+
+MappingStringOrChild:
+	strVal=STRING | type=ChildNameRef
 ;
 
 Responses:
@@ -31,9 +47,12 @@ Responses:
 ;
 
 ResponseValue:
-	'reply' response=STRING 
+	{ResponseValue} 'reply' response+=ResponseValueStringOrChild*
 ;
 
+ResponseValueStringOrChild:
+	strVal=STRING | type=ChildNameRef
+;
 
 Actions:
 	 {Actions} 'actions' actions+=ActionValue*
@@ -52,9 +71,17 @@ Entity:
 ;
 
 EntityValue:
-	'reference' value=STRING (('synonym'|'synonyms') synonyms=EntitySynonyms)?
+	'reference' value=EntityValueStringOrChild (('synonym'|'synonyms') synonyms=EntitySynonyms)?
+;
+
+EntityValueStringOrChild:
+	strVal=STRING | type=ChildNameRef
 ;
 
 EntitySynonyms:
 	{EntitySynonyms} values+=STRING (',' values+=STRING )*
+;
+
+SystemEntity:
+	'sysEntity' name=ID value+=STRING
 ;
