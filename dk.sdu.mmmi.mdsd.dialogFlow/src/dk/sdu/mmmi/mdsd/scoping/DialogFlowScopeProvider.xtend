@@ -3,7 +3,6 @@
  */
 package dk.sdu.mmmi.mdsd.scoping
 
-import org.eclipse.xtext.scoping.IScope
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import dk.sdu.mmmi.mdsd.dialogFlow.DialogFlowPackage
@@ -28,45 +27,31 @@ class DialogFlowScopeProvider extends AbstractDialogFlowScopeProvider {
 	override getScope(EObject context, EReference reference) {		
 		if(context instanceof ActionValue && reference==DialogFlowPackage.Literals.ACTION_VALUE__TYPE) {
 			val seen = new HashSet<DialogFlowSystem>
-			var entity = EcoreUtil2.getContainerOfType(context,DialogFlowSystem)
+			var diaSystem = EcoreUtil2.getContainerOfType(context,DialogFlowSystem)
 			val candidates = new ArrayList<Declaration>
-			while(entity!==null) {
-				if(seen.contains(entity)) return super.getScope(context, reference) // scope undefined
-				seen.add(entity)
-				candidates.addAll(entity.declarations.filter(Entity))
-				entity = entity.zuper
+			while(diaSystem!==null) {
+				if(seen.contains(diaSystem)) return super.getScope(context, reference) // scope undefined
+				seen.add(diaSystem)
+				candidates.addAll(diaSystem.declarations.filter(Entity))
+				candidates.addAll(diaSystem.declarations.filter(SystemEntity))
+				diaSystem = diaSystem.zuper
 			}
 			return Scopes.scopeFor(candidates)			
 		}
 		
 		if(context instanceof Mapping && reference==DialogFlowPackage.Literals.MAPPING__ENTITY) {
 			val seen = new HashSet<DialogFlowSystem>
-			var entity = EcoreUtil2.getContainerOfType(context,DialogFlowSystem)
+			var diaSystem = EcoreUtil2.getContainerOfType(context,DialogFlowSystem)
 			val candidates = new ArrayList<Declaration>
-			while(entity!==null) {
-				if(seen.contains(entity)) return super.getScope(context, reference) // scope undefined
-				seen.add(entity)
-				candidates.addAll(entity.declarations.filter(Entity))
-				candidates.addAll(entity.declarations.filter(SystemEntity))
-				entity = entity.zuper
+			while(diaSystem!==null) {
+				if(seen.contains(diaSystem)) return super.getScope(context, reference) // scope undefined
+				seen.add(diaSystem)
+				candidates.addAll(diaSystem.declarations.filter(Entity))
+				candidates.addAll(diaSystem.declarations.filter(SystemEntity))
+				diaSystem = diaSystem.zuper
 			}
 			return Scopes.scopeFor(candidates)						
-		}
-		
-		/*if(context instanceof MappingEntity && reference==DialogFlowPackage.Literals.MAPPING_ENTITY__SYS) {
-			if ((context as MappingEntity).sys !== null) {
-				val seen = new HashSet<DialogFlowSystem>
-				var entity = EcoreUtil2.getContainerOfType(context,DialogFlowSystem)
-				val candidates = new ArrayList<Declaration>
-				while(entity!==null) {
-					if(seen.contains(entity)) return super.getScope(context, reference) // scope undefined
-					seen.add(entity)
-					candidates.addAll(entity.declarations.filter(SystemEntity))
-					entity = entity.zuper
-				}
-				return Scopes.scopeFor(candidates)				
-			}			
-		}			*/		
+		}		
 		
 		return super.getScope(context, reference)
 	}

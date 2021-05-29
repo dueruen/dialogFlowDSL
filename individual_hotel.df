@@ -1,11 +1,3 @@
-# A generic DSL for generating agent for Google dialogFlow ES
-
-The syntax for the language made in the group project can be seen in the examples `dialogFlow.df`, `alarm.df` and `flightBooking.df`.
-
-Extended examples from the individual part can be seen in `individual_car.df` and `individual_hotel.df`.
-
-The following is the example from `individual_hotel.df`.
-```
 system BaseSystem
   sysEntity sysPeriod "sys.date-period"
   sysEntity sysTime "sys.date-time"
@@ -58,4 +50,3 @@ system HiltonBooking : HotelBooking
  		expression "What is for breakfast"
 	responses 
 		reply "Hilton has the best breakfast"
-```

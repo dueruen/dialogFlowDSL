@@ -1,0 +1,31 @@
+system BaseSystem
+  sysEntity sysNumber "sys.number"
+	
+system BookingSystem : BaseSystem
+  entity star
+	reference "1" synonyms "1 or more", "1 star"
+	reference "2" synonyms "2 or more", "2 star"
+
+system CarBooking : BookingSystem
+  entity car_type
+	reference "sedan"
+	reference "coupe"
+	reference "sports" synonym "super"	
+  intent Book
+    phrases
+ 		expression "book a car of type ", "super" as car_type
+ 		expression "book ",  "1 " as sysNumber, " sedan" as car_type
+ 	responses 
+    	reply "Okay I have booked $number $car-type from " sysName
+    actions
+ 		param star type star "star"
+ 		param number type sysNumber "number"
+ 		param car_type type car_type "car-type"
+
+system HertzBooking : CarBooking 
+  systemName "Hertz"
+  intent SpecialCar
+    phrases
+	 	expression "Book Hertz special car"
+	responses 
+		reply "Hertz special car is booked"

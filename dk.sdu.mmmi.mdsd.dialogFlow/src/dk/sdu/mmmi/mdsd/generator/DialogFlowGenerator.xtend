@@ -19,7 +19,7 @@ import dk.sdu.mmmi.mdsd.dialogFlow.Intent
 class DialogFlowGenerator extends AbstractGenerator {
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		val baseSystem = resource.allContents.filter(DialogFlowSystem).next
+		val baseSystem = resource.allContents.filter(DialogFlowSystem).last
 
 		val rootElementCreator = new RootElementCreator(baseSystem.name)
 		rootElementCreator.generateElements(baseSystem, fsa)

@@ -13,7 +13,6 @@ import java.util.Set
 import dk.sdu.mmmi.mdsd.dialogFlow.Systems
 import dk.sdu.mmmi.mdsd.dialogFlow.EntityValueStringOrChild
 import dk.sdu.mmmi.mdsd.dialogFlow.ResponseValueStringOrChild
-import dk.sdu.mmmi.mdsd.dialogFlow.ResponseValue
 import dk.sdu.mmmi.mdsd.dialogFlow.Intent
 import java.util.ArrayList
 import dk.sdu.mmmi.mdsd.dialogFlow.ActionValue
@@ -44,7 +43,7 @@ class DialogFlowValidator extends AbstractDialogFlowValidator {
 	
 	@Check
 	def checkResponses(ResponseValueStringOrChild responseValue) {
-		if (responseValue.strVal == null) {
+		if (responseValue.strVal === null) {
 			return
 		}
 		
@@ -53,7 +52,7 @@ class DialogFlowValidator extends AbstractDialogFlowValidator {
 		var actionValues = new ArrayList<String>();
 		for (ActionValue action : intent.action.actions) {
 			actionValues.add(action.value);
-		}
+		}		
 
 		var tokens = responseValue.strVal.split(" ");
 		for (String s : tokens) {
@@ -83,7 +82,7 @@ class DialogFlowValidator extends AbstractDialogFlowValidator {
 	
 	@Check
 	def checkResponseValueStringOrChild(ResponseValueStringOrChild vdata) {
-		if (vdata.type == null) {
+		if (vdata.type === null) {
 			return
 		}
 		
@@ -105,7 +104,7 @@ class DialogFlowValidator extends AbstractDialogFlowValidator {
 	
 	@Check
 	def checkEntityValueStringOrChild(EntityValueStringOrChild vdata) {
-		if (vdata.type == null) {
+		if (vdata.type === null) {
 			return
 		}
 		
@@ -127,7 +126,7 @@ class DialogFlowValidator extends AbstractDialogFlowValidator {
 	
 	@Check
 	def checkMappingStringOrChild(MappingStringOrChild vdata) {
-		if (vdata.type == null) {
+		if (vdata.type === null) {
 			return
 		}
 		

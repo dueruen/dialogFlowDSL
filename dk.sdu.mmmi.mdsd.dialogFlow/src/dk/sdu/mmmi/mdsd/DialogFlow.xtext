@@ -11,7 +11,7 @@ DialogFlowSystem:
 ;
 
 ChildName:
-	'systemName' value=STRING
+	'systemName' name=STRING
 ;
 
 ChildNameRef:
@@ -59,7 +59,7 @@ Actions:
 ;
 
 ActionValue:
-	'param' name=ID 'type' type=[Entity] value=STRING (list=ActionValueIsList)?
+	'param' name=ID ('type' type=[Entity] | type=[SystemEntity]) value=STRING (list=ActionValueIsList)?
 ;
 
 ActionValueIsList:
@@ -83,5 +83,5 @@ EntitySynonyms:
 ;
 
 SystemEntity:
-	'sysEntity' name=ID value+=STRING
+	'sysEntity' name=ID value=STRING
 ;

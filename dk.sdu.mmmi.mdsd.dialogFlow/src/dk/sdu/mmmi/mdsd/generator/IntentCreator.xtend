@@ -3,6 +3,14 @@ package dk.sdu.mmmi.mdsd.generator
 import dk.sdu.mmmi.mdsd.dialogFlow.Intent
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import java.util.UUID
+import dk.sdu.mmmi.mdsd.dialogFlow.Mapping
+import org.eclipse.xtext.EcoreUtil2
+import dk.sdu.mmmi.mdsd.dialogFlow.DialogFlowSystem
+import dk.sdu.mmmi.mdsd.dialogFlow.Systems
+import dk.sdu.mmmi.mdsd.dialogFlow.ResponseValue
+import dk.sdu.mmmi.mdsd.dialogFlow.ResponseValueStringOrChild
+import dk.sdu.mmmi.mdsd.dialogFlow.ActionValue
+import dk.sdu.mmmi.mdsd.dialogFlow.SystemEntity
 
 class IntentCreator {
 	String systemName
@@ -32,34 +40,52 @@ class IntentCreator {
 	}
 
 	def private compileUserSays(Intent intent){
-		''''''
-		/*var id = UUID.randomUUID().toString()
+		var id = UUID.randomUUID().toString()
 		'''
 		[
 		«FOR expression : intent.phrase.phrases SEPARATOR ','»
-			{
-			    "id": "«id»",
-			    "data": [
-			    
-			    	«FOR value : expression.mapping SEPARATOR ','»
-						{
-							"text": "«value.value»",
-							«IF value.entity !== null»
-							"meta": "@«value.entity.name»",
-							"alias": "«value.entity.name»",						
-							«ENDIF»
-							"userDefined": false
-						}
+		{
+		    "id": "«id»",
+		    "data": [
+			    	«FOR mapValue : expression.mapping SEPARATOR ','»
+					{
+						«IF mapValue.value.strVal !== null» 
+						"text": "«mapValue.value.strVal»",
+						«ELSEIF mapValue.value.type !== null»
+						"text": "«getChildName(mapValue)»",
+						«ENDIF»
+						
+						«IF mapValue.entity !== null»
+						"meta": "@«mapValue.entity.name»",
+						"alias": "«mapValue.entity.name»",						
+						«ENDIF»
+						"userDefined": false
+					}
 					«ENDFOR»
-			    ],
-			    "isTemplate": false,
-			    "count": 0,
-			    "lang": "en",
-			    "updated": 0
-		  	}
-		  «ENDFOR»
+		    ],
+		    "isTemplate": false,
+		    "count": 0,
+		    "lang": "en",
+		    "updated": 0
+		}
+		«ENDFOR»
 		]
-		'''*/
+		'''
+	}
+	
+	def private getChildName(Mapping mapping) {
+		var startEntity = EcoreUtil2.getContainerOfType(mapping,DialogFlowSystem)
+		var allSystems = EcoreUtil2.getContainerOfType(mapping,Systems)
+		var name = "";
+		
+		for (DialogFlowSystem sys : allSystems.systems) {
+			if (sys.zuper !== null) {
+				if (sys.zuper == startEntity && sys.systemName !== null) {
+					name = sys.systemName.name;
+				}						
+			}
+		}
+		return name	
 	}
 
 	def private compilePhrases(Intent intent){
@@ -82,7 +108,7 @@ class IntentCreator {
 		          "id": "«UUID.randomUUID().toString()»",
 		          "name": "«parameter.name»",
 		          "required": false,
-		          "dataType": "@«parameter.type.name»",
+		          "dataType": "@«getDatatype(parameter)»",
 		          "value": "$«parameter.value»",
 		          "defaultValue": "",
 		          "isList": «IF parameter.list !== null»"true"«ELSE»"false"«ENDIF»,
@@ -103,7 +129,7 @@ class IntentCreator {
 		          "lang": "en",
 		          "speech": [
 		          «FOR reply : intent.response.responses SEPARATOR ','»
-		            "«reply.response»"
+		            "«getreplyString(reply)»"
 		          «ENDFOR»
 		          ],
 		          "condition": ""
@@ -123,5 +149,44 @@ class IntentCreator {
 		}
 		'''
 	}
+	
+	def private getDatatype(ActionValue aValue) {
+		var typeName = ""
+		if (aValue.type instanceof SystemEntity) {
+			typeName = (aValue.type as SystemEntity).value
+		} else {
+			typeName = aValue.type.name
+		}
+		return typeName
+	}
+	
+	def private getreplyString(ResponseValue resValue) {
+		var s = ""
+		
+		for (ResponseValueStringOrChild v : resValue.response) {
+			if (v.strVal !== null) {
+				s = s + v.strVal	
+			} else if (v.type !== null) {
+				var cName = getChildName(resValue)
+				s = s + cName
+			}
+		}
+		return s	
+	}	
+	
+	def private getChildName(ResponseValue resVal) {
+		var startEntity = EcoreUtil2.getContainerOfType(resVal,DialogFlowSystem)
+		var allSystems = EcoreUtil2.getContainerOfType(resVal,Systems)
+		var name = "";
+		
+		for (DialogFlowSystem sys : allSystems.systems) {
+			if (sys.zuper !== null) {
+				if (sys.zuper == startEntity && sys.systemName !== null) {
+					name = sys.systemName.name;
+				}						
+			}
+		}
+		return name	
+	}	
 
 } 
